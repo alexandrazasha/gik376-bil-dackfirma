@@ -3,13 +3,20 @@
 import { ref } from 'vue';
 import initialBookings from '../assets/bookings.json'; 
 
-const bookings = ref(initialBookings);
+// Nyckelnamnet för lagring i webbläsaren
+const STORAGE_KEY = 'bilfirma_bookings'
 
-// --- fejk spara-funktion
+// Hämtar data och kollar om det finns sparat i webbläsaren, annars använd JSON-filen
+const savedBookings = localStorage.getItem(STORAGE_KEY);
+const bookings = ref(savedBookings ? JSON.parse(savedBookings) : initialBookings);
+
+/**
+ * funktion för att spara nuvarande information till localStorage
+ */
 function simulateSave() {
-    console.log("Bokningsdatan har uppdaterats!");
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(bookings.value));
+    console.log("Bokningsdatan har uppdaterats och sparats i webbläsaren!");
 }
-
 
 // --- De olika funktionerna (crud-delen) 
 
@@ -52,6 +59,15 @@ export function updateBooking(id, updatedFields) {
 }
 
 /**
+ * Markera bokning som pågående
+ */
+export function startBooking(id) {
+    updateBooking(id, { 
+        status: 'pågående' 
+    });
+}
+
+/**
  * Ta bort bokning (Delete)
  */
 export function deleteBooking(id) {
@@ -68,4 +84,9 @@ export function completeBooking(id, performedAction) {
         performedAction: performedAction,
         dateCompleted: new Date().toISOString()
     });
+}
+
+const getServiceInfo = (serviceName) => {
+  // Vi letar i objektet ovan, annars returnerar vi en standardtext
+  return serviceDescriptions[serviceName] || 'Information om denna tjänst fås vid inlämning av fordonet.'
 }
