@@ -1,6 +1,9 @@
 <script setup>
-import { reactive, ref } from "vue"
-import { addBooking } from "../services/bookingService.js"
+import { reactive, ref, computed, watch } from "vue"
+import { addBooking, getBookings } from "../services/bookingService.js"
+
+// Hämta alla bokningar (reaktiv lista)
+const allBookings = getBookings()
 
 const form = reactive({
   kundNamn: "",
@@ -15,8 +18,39 @@ const form = reactive({
 const successMessage = ref("")
 const errorMessage = ref("")
 
+// Fasta tider (kan justeras)
+const timeSlots = [
+  "09:00",
+  "10:00",
+  "11:00",
+  "12:00",
+  "13:00",
+  "14:00",
+  "15:00",
+  "16:00"
+]
+
+// ✅ Lediga tider = alla tider minus de som redan är bokade den dagen
+const availableTimes = computed(() => {
+  if (!form.datum) return []
+
+  const takenTimes = allBookings.value
+    .filter(b => b.datum === form.datum && b.status !== "avbokad")
+    .map(b => b.tid)
+    .filter(Boolean)
+
+  return timeSlots.filter(t => !takenTimes.includes(t))
+})
+
+// ✅ När datum ändras: nollställ vald tid
+watch(
+  () => form.datum,
+  () => {
+    form.tid = ""
+  }
+)
+
 function handleSubmit() {
-  // Enkel validering
   if (
     !form.kundNamn ||
     !form.email ||
@@ -31,7 +65,13 @@ function handleSubmit() {
     return
   }
 
-  // Skicka ENDAST form-data (bookingService lägger själv till id + status)
+  // Extra skydd: om någon hunnit boka samma tid precis innan submit
+  if (!availableTimes.value.includes(form.tid)) {
+    errorMessage.value = "Tiden du valt är inte längre ledig. Välj en annan tid."
+    successMessage.value = ""
+    return
+  }
+
   addBooking({ ...form })
 
   successMessage.value = `Tack ${form.kundNamn}! Din bokning ${form.datum} kl ${form.tid} är registrerad.`
@@ -104,7 +144,21 @@ function handleSubmit() {
 
       <div class="form-group">
         <label for="tid">Tid</label>
-        <input id="tid" type="time" v-model="form.tid" required />
+
+        <!-- ✅ Visar lediga tider när datum är valt -->
+        <select id="tid" v-model="form.tid" :disabled="!form.datum" required>
+          <option value="" disabled>
+            {{ form.datum ? "Välj tid..." : "Välj datum först..." }}
+          </option>
+
+          <option v-for="t in availableTimes" :key="t" :value="t">
+            {{ t }}
+          </option>
+        </select>
+
+        <p v-if="form.datum && availableTimes.length === 0" class="no-times">
+          Inga lediga tider för valt datum. Välj ett annat datum.
+        </p>
       </div>
 
       <div class="form-group">
@@ -132,6 +186,7 @@ function handleSubmit() {
   text-align: center;
   margin-bottom: 2rem;
 }
+
 .booking-form {
   max-width: 600px;
   margin: 0 auto;
@@ -151,6 +206,7 @@ function handleSubmit() {
   font-weight: bold;
   color: #333;
 }
+
 .form-group input,
 .form-group select {
   width: 100%;
@@ -159,6 +215,13 @@ function handleSubmit() {
   border-radius: 8px;
   box-sizing: border-box;
 }
+
+.no-times {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #666;
+}
+
 .submit-btn {
   width: 100%;
   padding: 1rem;
@@ -181,12 +244,15 @@ function handleSubmit() {
   margin-bottom: 1rem;
   border-radius: 8px;
 }
+
 .success {
   background-color: #e9f5e9;
   color: #28a745;
 }
+
 .error {
   background-color: #f8d7da;
   color: #721c24;
 }
 </style>
+
