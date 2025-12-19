@@ -58,6 +58,12 @@ const saveEdit = () => {
   editingId.value = null
 }
 
+const handleDelete = (bookingId) => {
+  if (confirm('Är du säker på att du vill ta bort?')) {
+    deleteBooking(bookingId)
+  }
+}
+
 // Sök
 const searchedBookings = computed(() => {
   const query = searchQuery.value.trim().toLowerCase()
@@ -183,7 +189,7 @@ const filteredBookings = computed(() => {
                 </button>
 
                 <button @click="startEdit(booking)" class="edit-btn">Ändra</button>
-                <button @click="deleteBooking(booking.id)" class="delete-btn">Ta bort</button>
+                <button @click="handleDelete(booking.id)" class="delete-btn">Ta bort</button>
               </div>
             </div>
 
@@ -392,4 +398,3 @@ const filteredBookings = computed(() => {
   flex: 1;
 }
 </style>
-
