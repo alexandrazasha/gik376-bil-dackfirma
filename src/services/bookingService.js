@@ -1,48 +1,58 @@
-
-
 import { ref } from 'vue';
 import initialBookings from '../assets/bookings.json'; 
 
-const bookings = ref(initialBookings);
+// Nyckelnamnet för lagring i webbläsaren
+const STORAGE_KEY = 'bilfirma_bookings'
 
-// --- fejk spara-funktion
-function simulateSave() {
-    console.log("Bokningsdatan har uppdaterats (simulerad sparning)!");
-}
-
-
-// --- De olika funktionerna (crud) 
-
+// Kollar om det finns data i webbläsarens localStorage. Om inte, använd vår JSON-fil.
+const savedBookings = localStorage.getItem(STORAGE_KEY);
+const bookings = ref(savedBookings ? JSON.parse(savedBookings) : initialBookings);
 
 /**
- * Exponerar den reaktiva listan av bokningar för vyer.
+ * Funktion för att spara den aktuella listan med bokningar till localStorage.
+ * Detta simulerar en databas och gör att ändringar finns kvar om man laddar om sidan.
+ */
+function simulateSave() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(bookings.value));
+    console.log("Bokningsdatan har uppdaterats och sparats i webbläsaren!");
+}
+
+// --- Funktioner för att hantera bokningar (CRUD: Create, Read, Update, Delete) ---
+
+/**
+ * Hämtar den reaktiva listan med alla bokningar.
  */
 export function getBookings() {
     return bookings;
 }
 
 /**
- * Lägg till bokning (Create)
+ * Lägger till en ny bokning i listan.
  */
 export function addBooking(newBookingData) {
+    // Skapar ett unikt ID baserat på aktuell tid
     const newId = Date.now();
     
+    // Skapar det nya bokningsobjektet med standardstatus 'bokad'
     const newBooking = { 
         id: newId, 
         status: 'bokad', 
         ...newBookingData 
     };
 
+    // Lägger till den nya bokningen i listan och sparar
     bookings.value.push(newBooking);
     simulateSave();
 }
 
 /**
- * Uppdatera bokning (Update)
+ * Uppdaterar en befintlig bokning med ny data.
  */
 export function updateBooking(id, updatedFields) {
+    // Hittar bokningens position i listan via dess id
     const index = bookings.value.findIndex(b => b.id === id);
 
+    // Om bokningen hittas, uppdatera den
     if (index !== -1) {
         bookings.value[index] = { ...bookings.value[index], ...updatedFields };
         simulateSave();
@@ -52,7 +62,16 @@ export function updateBooking(id, updatedFields) {
 }
 
 /**
- * Ta bort bokning (Delete)
+ * Ändrar status på en bokning till 'pågående'.
+ */
+export function startBooking(id) {
+    updateBooking(id, { 
+        status: 'pågående' 
+    });
+}
+
+/**
+ * Tar bort en bokning från listan baserat på id.
  */
 export function deleteBooking(id) {
     bookings.value = bookings.value.filter(b => b.id !== id);
@@ -60,12 +79,12 @@ export function deleteBooking(id) {
 }
 
 /**
- * Markera bokning som avslutad (Specialiserad Update)
+ * Markerar en bokning som 'avslutad' och sparar info om vad som gjorts.
  */
 export function completeBooking(id, performedAction) {
     updateBooking(id, { 
         status: 'avslutad', 
         performedAction: performedAction,
-        dateCompleted: new Date().toISOString()
+        dateCompleted: new Date().toISOString() // Sparar datum och tid när den avslutades
     });
 }

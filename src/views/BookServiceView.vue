@@ -1,8 +1,8 @@
 <script setup>
 import { reactive, ref } from 'vue';
-import { addBooking } from '../services/bookingService.js';
+import { addBooking } from '../services/bookingService.js'; // Importerar funktionen för att lägga till bokning
 
-// Reaktiva variabler för formulärdata
+// Ett reaktivt objekt för att hålla all formulärdata
 const form = reactive({
   kundNamn: "",
   regNr: "",
@@ -10,12 +10,12 @@ const form = reactive({
   service: ""
 });
 
-// För att visa meddelanden till användaren
+// Reaktiva variabler för att visa meddelanden till användaren efter submit
 const successMessage = ref('');
 const errorMessage = ref('');
 
 const handleSubmit = () => {
-  // Enkel validering
+  // Enkel validering för att se till att alla fält är ifyllda
   if (!form.kundNamn || !form.regNr || !form.datum || !form.service) {
     errorMessage.value = 'Alla fält måste fyllas i.';
     successMessage.value = '';
@@ -29,7 +29,7 @@ const handleSubmit = () => {
   successMessage.value = `Bokning för ${form.kundNamn} har registrerats!`;
   errorMessage.value = '';
   
-  // Återställ formuläret
+  // Återställer formuläret så att det blir tomt igen
   Object.keys(form).forEach(key => form[key] = "");
 
   // Valfritt: Dölj meddelandet efter några sekunder
@@ -46,6 +46,7 @@ const handleSubmit = () => {
       <p>Fyll i formuläret nedan för att boka en ny servicetid.</p>
     </div>
 
+    <!-- Formulär som anropar handleSubmit när det skickas -->
     <form @submit.prevent="handleSubmit" class="booking-form">
       <div class="form-group">
         <label for="kundNamn">Kundens namn</label>
@@ -73,6 +74,7 @@ const handleSubmit = () => {
         <input id="datum" type="date" v-model="form.datum" required>
       </div>
 
+      <!-- Meddelanden som visas villkorligt (med v-if) -->
       <div v-if="successMessage" class="message success">{{ successMessage }}</div>
       <div v-if="errorMessage" class="message error">{{ errorMessage }}</div>
 

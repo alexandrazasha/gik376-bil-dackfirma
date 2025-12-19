@@ -1,5 +1,5 @@
 <script setup>
-import services from '../assets/services.json'
+import services from '../assets/services.json' // Importerar prislistan från en JSON-fil
 </script>
 
 <template>
@@ -18,6 +18,7 @@ import services from '../assets/services.json'
       </p>
 
       <h2>Prislista</h2>
+      <!-- Loopar igenom och skriver ut alla tjänster från vår importerade JSON-fil -->
       <ul class="price-list">
         <li v-for="service in services" :key="service.name">
           <strong>{{ service.name }}:</strong> {{ service.price }}
