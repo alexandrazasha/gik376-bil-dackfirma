@@ -1,92 +1,108 @@
-
-
-import { ref } from 'vue';
-import initialBookings from '../assets/bookings.json'; 
+import { ref } from "vue"
 
 // Nyckelnamnet för lagring i webbläsaren
-const STORAGE_KEY = 'bilfirma_bookings'
+const STORAGE_KEY = "bilfirma_bookings"
 
-// Hämtar data och kollar om det finns sparat i webbläsaren, annars använd JSON-filen
-const savedBookings = localStorage.getItem(STORAGE_KEY);
-const bookings = ref(savedBookings ? JSON.parse(savedBookings) : initialBookings);
+// Reaktiv lista som används i vyerna
+const bookings = ref([])
 
 /**
- * funktion för att spara nuvarande information till localStorage
+ * Initierar bokningar:
+ * 1. Läser från localStorage om det finns
+ * 2. Annars laddas från public/bookings.json
+ */
+async function initBookings() {
+  const saved = localStorage.getItem(STORAGE_KEY)
+  if (saved) {
+    bookings.value = JSON.parse(saved)
+    return
+  }
+
+  try {
+    const res = await fetch("/bookings.json")
+    if (!res.ok) throw new Error("Kunde inte ladda bookings.json")
+
+    bookings.value = await res.json()
+
+    // Spara initial data lokalt för vidare arbete
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(bookings.value))
+  } catch (error) {
+    console.error(error)
+    bookings.value = []
+  }
+}
+
+// Kör direkt när filen laddas
+initBookings()
+
+/**
+ * Sparar aktuell bokningsdata (simulerat backend-sparande)
  */
 function simulateSave() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(bookings.value));
-    console.log("Bokningsdatan har uppdaterats och sparats i webbläsaren!");
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(bookings.value))
+  console.log("Bokningsdatan har sparats")
 }
 
-// --- De olika funktionerna (crud-delen) 
-
-
 /**
- * Visar listan av bokningar.
+ * Hämtar bokningar (används i vyerna)
  */
 export function getBookings() {
-    return bookings;
+  return bookings
 }
 
 /**
- * Lägg till bokning (Create)
+ * Skapa ny bokning
  */
 export function addBooking(newBookingData) {
-    const newId = Date.now();
-    
-    const newBooking = { 
-        id: newId, 
-        status: 'bokad', 
-        ...newBookingData 
-    };
+  const newBooking = {
+    id: Date.now(),
+    status: "bokad",
+    ...newBookingData
+  }
 
-    bookings.value.push(newBooking);
-    simulateSave();
+  bookings.value.push(newBooking)
+  simulateSave()
 }
 
 /**
- * Uppdatera bokning (Update)
+ * Uppdatera befintlig bokning
  */
 export function updateBooking(id, updatedFields) {
-    const index = bookings.value.findIndex(b => b.id === id);
+  const index = bookings.value.findIndex((b) => b.id === id)
 
-    if (index !== -1) {
-        bookings.value[index] = { ...bookings.value[index], ...updatedFields };
-        simulateSave();
-        return true;
+  if (index !== -1) {
+    bookings.value[index] = {
+      ...bookings.value[index],
+      ...updatedFields
     }
-    return false;
+    simulateSave()
+    return true
+  }
+  return false
 }
 
 /**
  * Markera bokning som pågående
  */
 export function startBooking(id) {
-    updateBooking(id, { 
-        status: 'pågående' 
-    });
+  updateBooking(id, { status: "pågående" })
 }
 
 /**
- * Ta bort bokning (Delete)
+ * Ta bort bokning
  */
 export function deleteBooking(id) {
-    bookings.value = bookings.value.filter(b => b.id !== id);
-    simulateSave();
+  bookings.value = bookings.value.filter((b) => b.id !== id)
+  simulateSave()
 }
 
 /**
- * Markera bokning som avslutad 
+ * Markera bokning som avslutad
  */
 export function completeBooking(id, performedAction) {
-    updateBooking(id, { 
-        status: 'avslutad', 
-        performedAction: performedAction,
-        dateCompleted: new Date().toISOString()
-    });
-}
-
-const getServiceInfo = (serviceName) => {
-  // Vi letar i objektet ovan, annars returnerar vi en standardtext
-  return serviceDescriptions[serviceName] || 'Information om denna tjänst fås vid inlämning av fordonet.'
+  updateBooking(id, {
+    status: "avslutad",
+    performedAction,
+    dateCompleted: new Date().toISOString()
+  })
 }

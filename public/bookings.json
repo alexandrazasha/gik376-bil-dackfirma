@@ -1,0 +1,37 @@
+[
+  {
+    "id": 1678881234,
+    "kundNamn": "Erik Svensson",
+    "regNr": "ABC 123",
+    "datum": "2025-12-15",
+    "tid": "09:00",
+    "service": "Oljebyte",
+    "status": "bokad",
+    "telefon": "0701112233",
+    "email": "erik@test.se"
+  },
+  {
+    "id": 1678881235,
+    "kundNamn": "Lena Andersson",
+    "regNr": "XYZ 987",
+    "datum": "2025-12-16",
+    "tid": "14:30",
+    "service": "Däckbyte",
+    "status": "pågående",
+    "telefon": "0704445566",
+    "email": "lena@test.se"
+  },
+  {
+    "id": 1678881236,
+    "kundNamn": "Stefan Karlsson",
+    "regNr": "TES 001",
+    "datum": "2025-12-17",
+    "tid": "10:00",
+    "service": "Bromsjustering",
+    "status": "avslutad",
+    "telefon": "0707778899",
+    "email": "stefan@test.se",
+    "performedAction": "Bromsar justerade och smörjda",
+    "dateCompleted": "2025-12-17T12:00:00Z"
+  }
+]
