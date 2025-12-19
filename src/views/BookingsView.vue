@@ -8,6 +8,7 @@ const searchQuery = ref('')
 const statusFilter = ref('alla')
 const expandedId = ref(null) //tillhör 'läs mer' för att få info om bokningen
 
+<<<<<<< HEAD
 // funktion som växlar mellan att visa och dölja
 const toggleReadMore = (id) => {
   if (expandedId.value === id) {
@@ -50,6 +51,11 @@ const saveEdit = () => {
 }
 
 // Sök- och filterlogik
+=======
+// ✅ NYTT: datumfilter (tomt = alla datum)
+const dateFilter = ref('')
+
+>>>>>>> Alexandras
 const searchedBookings = computed(() => {
   const query = searchQuery.value.toLowerCase()
   if (!query) return allBookings.value
@@ -63,10 +69,21 @@ const searchedBookings = computed(() => {
   })
 })
 
+// ✅ UPPDATERAD: filterar nu på status + datum
 const filteredBookings = computed(() => {
-  const filter = statusFilter.value
-  if (filter === 'alla') return searchedBookings.value
-  return searchedBookings.value.filter(booking => booking.status === filter)
+  let list = searchedBookings.value
+
+  // status
+  if (statusFilter.value !== 'alla') {
+    list = list.filter(b => b.status === statusFilter.value)
+  }
+
+  // datum
+  if (dateFilter.value) {
+    list = list.filter(b => b.datum === dateFilter.value)
+  }
+
+  return list
 })
 
 
@@ -78,7 +95,20 @@ const filteredBookings = computed(() => {
 
     <div class="controls-container">
       <div class="search-input">
+<<<<<<< HEAD
         <input type="text" v-model="searchQuery" placeholder="Sök kund, reg.nr eller service..." />
+=======
+        <input
+          type="text"
+          v-model="searchQuery"
+          placeholder="🔍 Sök kund, reg.nr eller service..."
+        />
+      </div>
+
+      <!-- ✅ NYTT: datumfilter -->
+      <div class="date-filter">
+        <input type="date" v-model="dateFilter" class="date-input" />
+>>>>>>> Alexandras
       </div>
 
       <div class="filter-controls">
@@ -96,6 +126,7 @@ const filteredBookings = computed(() => {
 
       <ul v-else class="booking-list">
         <li v-for="booking in filteredBookings" :key="booking.id" :class="booking.status">
+<<<<<<< HEAD
           
           <div v-if="editingId === booking.id" class="edit-mode-container">
             <div class="edit-inputs">
@@ -107,6 +138,15 @@ const filteredBookings = computed(() => {
               <button @click="saveEdit" class="save-btn">Spara</button>
               <button @click="cancelEdit" class="cancel-btn">Avbryt</button>
             </div>
+=======
+          <div class="booking-info">
+            <strong>{{ booking.kundNamn }} ({{ booking.regNr }})</strong><br />
+            Tjänst: {{ booking.service }} |
+            Datum: {{ booking.datum }}
+            <span v-if="booking.tid">kl {{ booking.tid }}</span>
+            |
+            Status: <span class="status">{{ (booking.status || '').toUpperCase() }}</span>
+>>>>>>> Alexandras
           </div>
 
           <template v-else>
@@ -116,10 +156,14 @@ const filteredBookings = computed(() => {
                 Tjänst: {{ booking.service }} |
                 Status: <span class="status">{{ (booking.status || '').toUpperCase() }}</span>
 
+<<<<<<< HEAD
                 <button @click="toggleReadMore(booking.id)" class="read-more-link"> 
                   {{ expandedId === booking.id ? 'Visa mindre' : 'Läs mer om tjänsten' }}
                 </button>
               </div>
+=======
+            <button class="edit-btn" disabled title="Kommer senare">Redigera</button>
+>>>>>>> Alexandras
 
               <div class="actions">
                 <button v-if="booking.status === 'bokad'" @click="startBooking(booking.id)" class="start-btn">
@@ -147,9 +191,18 @@ const filteredBookings = computed(() => {
 </template>
 
 <style scoped>
-.controls-container { margin-bottom: 20px; display: flex; gap: 20px; align-items: center; }
+.controls-container { margin-bottom: 20px; display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
 .search-input input { padding: 8px; border: 1px solid #ccc; width: 300px; border-radius: 6px; }
 
+<<<<<<< HEAD
+=======
+.date-input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+>>>>>>> Alexandras
 .filter-controls button {
   padding: 8px 15px; border: 1px solid #ccc; background-color: #f0f0f0; cursor: pointer; border-radius: 6px;
 }
@@ -160,6 +213,7 @@ const filteredBookings = computed(() => {
   display: flex; flex-direction: column; align-items: stretch;
   padding: 15px; border-bottom: 1px solid #eee; transition: background 0.3s;
 }
+<<<<<<< HEAD
 
 /* Statusfärger */
 .booking-list li.avslutad { background-color: #f2f2f2; opacity: 0.8; }
@@ -202,3 +256,15 @@ const filteredBookings = computed(() => {
 .edit-inputs { display: flex; gap: 10px; flex-grow: 1; }
 .edit-inputs input { padding: 6px; border: 1px solid #ddd; border-radius: 4px; flex: 1; }
 </style>
+=======
+.booking-list li.avslutad { background-color: #e6e6e6; }
+.booking-list li.bokad { background-color: #f9f9e2; }
+
+.status { font-weight: bold; }
+
+.actions button { margin-left: 10px; padding: 6px 10px; cursor: pointer; border-radius: 6px; }
+.delete-btn { background-color: #e74c3c; color: white; border: none; }
+.complete-btn { background-color: #2ecc71; color: white; border: none; }
+.edit-btn { background-color: #f39c12; color: white; border: none; opacity: 0.6; cursor: not-allowed; }
+</style>
+>>>>>>> Alexandras
